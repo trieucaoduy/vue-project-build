@@ -19,14 +19,17 @@ RUN npm run build
 # Use the official Nginx image as the base image for serving the application
 FROM nginx:1.21
 
-# Copy the custom Nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy the built app from the previous stage
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy the built Vue application from the build-stage
-COPY --from=build-stage /app/dist /usr/share/nginx/html
+# Remove default NGINX website
+RUN rm -rf /usr/share/nginx/html/*
+
+# Copy custom nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port 80
 EXPOSE 80
 
-# Start Nginx
+# Command to run NGINX
 CMD ["nginx", "-g", "daemon off;"]
